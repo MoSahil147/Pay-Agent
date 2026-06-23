@@ -30,3 +30,7 @@ htmlcov/
 dist/
 build/
 *.egg-info/
+
+# Internal build scaffolding, not part of the submission
+.superpowers/
+docs/superpowers/
