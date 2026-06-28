@@ -28,18 +28,18 @@ User message: {user_input}"""
 
 EXTRACT_VERIFICATION_FACTOR = """Extract an identity verification factor from the user's message.
 The user may provide ONE of:
-- Date of birth → normalize to YYYY-MM-DD (e.g., "14th May 1990" → "1990-05-14", "May 14, 90" → "1990-05-14")
-- Last 4 digits of Aadhaar → exactly 4 digits as a string (e.g., "last four is 4321" → "4321")
-- Pincode → exactly 6 digits as a string (e.g., "pincode is 4 0 0 0 0 1" → "400001")
+- Date of birth → normalize to YYYY-MM-DD (e.g., "14th March 1985" → "1985-03-14", "Mar 14, 85" → "1985-03-14")
+- Last 4 digits of Aadhaar → exactly 4 digits as a string (e.g., "last four is 7890" → "7890")
+- Pincode → exactly 6 digits as a string (e.g., "pincode is 1 1 0 0 0 1" → "110001")
 
 If the user provides something but you cannot determine the type, return null.
 
 Return ONLY valid JSON, no explanation:
-{{"factor_type": "dob", "value": "1990-05-14"}}
+{{"factor_type": "dob", "value": "1985-03-14"}}
 or
-{{"factor_type": "aadhaar_last4", "value": "4321"}}
+{{"factor_type": "aadhaar_last4", "value": "7890"}}
 or
-{{"factor_type": "pincode", "value": "400001"}}
+{{"factor_type": "pincode", "value": "110001"}}
 or if nothing found:
 {{"factor_type": null, "value": null}}
 
