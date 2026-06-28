@@ -2,6 +2,8 @@
 
 A conversational AI agent for end-to-end payment collection. The agent greets a user, looks up their account, verifies their identity, shares their outstanding balance, collects card payment details, processes the payment, and closes the session.
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/MoSahil147/Pay-Agent)
+
 ## Setup
 
 1. Install uv:
