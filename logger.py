@@ -4,12 +4,13 @@
 import logging
 import re
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s %(name)s %(message)s",
-)
-
 logger = logging.getLogger("pay_agent")
+logger.setLevel(logging.INFO)
+logger.propagate = False
+if not logger.handlers:
+    _handler = logging.StreamHandler()
+    _handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s %(message)s"))
+    logger.addHandler(_handler)
 
 # Patterns that identify sensitive values which must never appear in logs
 _REDACT_PATTERNS = [
