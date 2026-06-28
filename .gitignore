@@ -31,6 +31,8 @@ dist/
 build/
 *.egg-info/
 
+test.txt
+
 # Internal build scaffolding, not part of the submission
 .superpowers/
 docs/superpowers/
