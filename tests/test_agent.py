@@ -32,7 +32,7 @@ def test_agent_returns_dict_with_message_key():
 
 def test_agent_extracts_account_id_from_first_message():
     with patch("llm.client.chat.completions.create") as mock_llm, \
-         patch("tools.httpx.post") as mock_http:
+         patch("tools._client.post") as mock_http:
 
         mock_llm.return_value = make_groq_response({"account_id": "ACC1001"})
         mock_http.return_value = MagicMock(json=lambda: ACCOUNT_DATA, status_code=200)
@@ -45,7 +45,7 @@ def test_agent_extracts_account_id_from_first_message():
 
 def test_agent_handles_unknown_account():
     with patch("llm.client.chat.completions.create") as mock_llm, \
-         patch("tools.httpx.post") as mock_http:
+         patch("tools._client.post") as mock_http:
 
         mock_llm.return_value = make_groq_response({"account_id": "ACC9999"})
         mock_http.return_value = MagicMock(
@@ -61,7 +61,7 @@ def test_agent_handles_unknown_account():
 
 def test_agent_locks_after_3_failed_verifications():
     with patch("llm.client.chat.completions.create") as mock_llm, \
-         patch("tools.httpx.post") as mock_http:
+         patch("tools._client.post") as mock_http:
 
         call_count = [0]
         def llm_side_effect(**kwargs):
@@ -87,7 +87,7 @@ def test_agent_locks_after_3_failed_verifications():
 def test_agent_zero_balance_informs_and_stays_open():
     zero_account = {**ACCOUNT_DATA, "account_id": "ACC1003", "balance": 0.0}
     with patch("llm.client.chat.completions.create") as mock_llm, \
-         patch("tools.httpx.post") as mock_http:
+         patch("tools._client.post") as mock_http:
 
         responses = iter([
             {"account_id": "ACC1003"},

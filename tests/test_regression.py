@@ -77,7 +77,7 @@ def test_no_payment_without_verification():
     from agent import Agent
     from state import State
     with patch("llm.client.chat.completions.create") as mock_llm, \
-         patch("tools.httpx.post") as mock_http:
+         patch("tools._client.post") as mock_http:
 
         mock_llm.return_value = groq_response({"account_id": "ACC1001"})
         mock_http.return_value = http_response(ACCOUNT_1001, 200)
@@ -101,7 +101,7 @@ def test_locked_after_exactly_3_failures():
     ])
 
     with patch("llm.client.chat.completions.create") as mock_llm, \
-         patch("tools.httpx.post") as mock_http:
+         patch("tools._client.post") as mock_http:
 
         mock_llm.side_effect = lambda *_, **__: groq_response(next(responses, {"full_name": None}))
         mock_http.return_value = http_response(ACCOUNT_1001, 200)
@@ -129,7 +129,7 @@ def test_locked_session_refuses_all_further_input():
     ])
 
     with patch("llm.client.chat.completions.create") as mock_llm, \
-         patch("tools.httpx.post") as mock_http:
+         patch("tools._client.post") as mock_http:
 
         mock_llm.side_effect = lambda *_, **__: groq_response(next(responses, {"full_name": None}))
         mock_http.return_value = http_response(ACCOUNT_1001, 200)
@@ -171,7 +171,7 @@ def test_unknown_account_id_does_not_advance_state():
     from state import State
 
     with patch("llm.client.chat.completions.create") as mock_llm, \
-         patch("tools.httpx.post") as mock_http:
+         patch("tools._client.post") as mock_http:
 
         mock_llm.return_value = groq_response({"account_id": "ACC9999"})
         mock_http.return_value = http_response({"error_code": "account_not_found"}, 404)
@@ -196,7 +196,7 @@ def test_zero_balance_account_stays_open():
     ])
 
     with patch("llm.client.chat.completions.create") as mock_llm, \
-         patch("tools.httpx.post") as mock_http:
+         patch("tools._client.post") as mock_http:
 
         mock_llm.side_effect = lambda *_, **__: groq_response(next(llm_responses, {}))
         mock_http.return_value = http_response(ACCOUNT_1003, 200)
@@ -218,7 +218,7 @@ def test_luhn_failure_blocks_payment_api_call():
     from validators import luhn_check
     assert luhn_check("1234567890123456") is False
 
-    with patch("tools.httpx.post") as mock_http:
+    with patch("tools._client.post") as mock_http:
         assert luhn_check("1234567890123456") is False
         mock_http.assert_not_called()
 
@@ -247,7 +247,7 @@ def test_account_sensitive_fields_absent_from_llm_prompts():
         return groq_response(next(llm_responses, {}))
 
     with patch("llm.client.chat.completions.create") as mock_llm, \
-         patch("tools.httpx.post") as mock_http:
+         patch("tools._client.post") as mock_http:
 
         mock_llm.side_effect = capture
         mock_http.return_value = http_response(ACCOUNT_1001, 200)

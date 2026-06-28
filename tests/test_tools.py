@@ -16,7 +16,7 @@ def test_lookup_account_success():
         "dob": "1990-05-14", "aadhaar_last4": "4321",
         "pincode": "400001", "balance": 1250.75
     }
-    with patch("tools.httpx.post", return_value=make_mock_response(expected, 200)) as mock_post:
+    with patch("tools._client.post", return_value=make_mock_response(expected, 200)) as mock_post:
         data, status = lookup_account("ACC1001")
         assert status == 200
         assert data["full_name"] == "Nithin Jain"
@@ -26,7 +26,7 @@ def test_lookup_account_success():
 
 
 def test_lookup_account_not_found():
-    with patch("tools.httpx.post", return_value=make_mock_response({"error_code": "account_not_found"}, 404)):
+    with patch("tools._client.post", return_value=make_mock_response({"error_code": "account_not_found"}, 404)):
         data, status = lookup_account("ACC9999")
         assert status == 404
         assert data["error_code"] == "account_not_found"
@@ -41,7 +41,7 @@ def test_process_payment_success():
         expiry_year=2027
     )
     response = {"success": True, "transaction_id": "txn_123"}
-    with patch("tools.httpx.post", return_value=make_mock_response(response, 200)) as mock_post:
+    with patch("tools._client.post", return_value=make_mock_response(response, 200)) as mock_post:
         data, status = process_payment("ACC1001", 500.00, card)
         assert status == 200
         assert data["success"] is True
@@ -59,7 +59,7 @@ def test_process_payment_invalid_card():
         expiry_year=2027
     )
     response = {"success": False, "error_code": "invalid_card"}
-    with patch("tools.httpx.post", return_value=make_mock_response(response, 422)):
+    with patch("tools._client.post", return_value=make_mock_response(response, 422)):
         data, status = process_payment("ACC1001", 500.00, card)
         assert status == 422
         assert data["error_code"] == "invalid_card"

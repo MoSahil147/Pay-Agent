@@ -1,6 +1,3 @@
-# Script-based evaluator. Drives each scenario through the agent turn by turn
-# and checks whether the final message matches the expected outcome.
-
 from agent import Agent
 from eval.scenarios import SCENARIOS
 
@@ -24,16 +21,23 @@ def run_scenario(scenario: dict) -> dict:
 
         is_last = i == total_steps - 1
         if is_last:
-            outcome = scenario["expected_outcome"]
-            step_correct = _check_outcome(message, outcome, agent)
+            step_correct = _check_outcome(message, scenario["expected_outcome"], agent)
         else:
-            step_correct = True  # intermediate turns assumed correct if no exception
+            # Previously this was unconditionally True, meaning intermediate turns
+            # were never evaluated and step_accuracy was always artificially high.
+            # Now each turn is checked against its expected stage so the metric
+            # reflects actual agent behaviour throughout the conversation.
+            step_correct = _check_stage(message, expected_stage)
 
         if step_correct:
             correct_steps += 1
         else:
             passed = False
-            failure_reason = f"Turn {i+1}: expected outcome '{scenario['expected_outcome']}' not met"
+            if failure_reason is None:
+                if is_last:
+                    failure_reason = f"Turn {i+1}: expected outcome '{scenario['expected_outcome']}' not met"
+                else:
+                    failure_reason = f"Turn {i+1}: expected stage '{expected_stage}' not matched in agent response"
 
     return {
         "name": scenario["name"],
@@ -43,6 +47,27 @@ def run_scenario(scenario: dict) -> dict:
         "failure_reason": failure_reason,
         "transcript": transcript,
     }
+
+
+def _check_stage(message: str, expected_stage: str) -> bool:
+    """Loose keyword check for intermediate turns. Returns True when the agent
+    response is consistent with the expected conversation stage."""
+    msg = message.lower()
+    if expected_stage == "lookup":
+        return "account" in msg
+    if expected_stage == "verify":
+        return "name" in msg
+    if expected_stage == "verify_secondary":
+        return any(k in msg for k in ("date of birth", "aadhaar", "pincode", "verification"))
+    if expected_stage == "balance":
+        return "balance" in msg or "outstanding" in msg
+    if expected_stage == "collect_payment":
+        return any(k in msg for k in ("card", "amount", "cvv", "expiry", "name on", "pay"))
+    if expected_stage == "done":
+        return "transaction" in msg or "processed successfully" in msg
+    if expected_stage == "locked":
+        return "locked" in msg or "support" in msg
+    return True
 
 
 def _check_outcome(final_message: str, expected_outcome: str, agent: Agent) -> bool:

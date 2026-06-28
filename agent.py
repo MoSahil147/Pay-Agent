@@ -86,7 +86,12 @@ class Agent:
     def _do_lookup(self) -> str:
         # Call the lookup API and populate AccountData on success.
         # On 404 we clear the stored ID so the user can try again.
-        data, status = lookup_account(self._state.account_id)
+        # A network exception means all retries in tools._post were exhausted;
+        # catch it here so the session can recover gracefully.
+        try:
+            data, status = lookup_account(self._state.account_id)
+        except Exception:
+            return "We're having trouble looking up your account right now. Please try again in a moment."
         if status == 404:
             bad_id = self._state.account_id
             self._state.account_id = None
@@ -276,11 +281,17 @@ class Agent:
     def _do_payment(self) -> str:
         # Submit to the payment API. On specific card errors, clear the offending field
         # so the user can re-enter it without restarting the whole card collection flow.
-        data, status = process_payment(
-            self._state.account.account_id,
-            self._state.payment_amount,
-            self._state.card,
-        )
+        # A network exception means all retries were exhausted; end the session cleanly.
+        try:
+            data, status = process_payment(
+                self._state.account.account_id,
+                self._state.payment_amount,
+                self._state.card,
+            )
+        except Exception:
+            self._state.state = State.DONE
+            return TERMINAL_ERROR_MSG
+
         if status == 200 and data.get("success"):
             self._state.transaction_id = data["transaction_id"]
             self._state.state = State.DONE
