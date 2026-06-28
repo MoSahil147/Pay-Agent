@@ -54,3 +54,6 @@ class ConversationState:
     card: CardData = field(default_factory=CardData)
     transaction_id: Optional[str] = None
     history: list = field(default_factory=list)
+    # Name extracted before the VERIFY state (e.g. volunteered in the same message
+    # as the account ID). Used once in _handle_verify to avoid re-asking.
+    pending_name: Optional[str] = None
