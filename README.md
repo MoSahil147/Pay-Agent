@@ -151,6 +151,32 @@ You: 1234567890123456
 Agent: That card number doesn't look right. Could you double-check it?
 ```
 
+### Payment Failure: Expired Card
+
+```
+...after successful verification...
+
+Agent: Identity verified. Your outstanding balance is ₹1,250.75. How much
+would you like to pay today?
+
+You: 500
+
+Agent: Got it. I'll need your card details. Please share your card number.
+
+You: 4532 0151 1283 0366
+
+Agent: What is the expiry date on your card? (e.g., December 2027 or 12/27)
+
+You: March 2020
+
+Agent: That expiry date is invalid or the card has expired. Please check
+and try again.
+
+You: December 2027
+
+Agent: What is the CVV on your card?
+```
+
 ### Edge Case: Zero Balance Account
 
 ```
