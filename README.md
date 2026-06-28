@@ -56,10 +56,10 @@ run_judge_on_all(results['results'])
 
 | Account ID | Full Name | Balance |
 |------------|-----------|---------|
-| ACC1001 | Nithin Jain | Rs. 1,250.75 |
-| ACC1002 | Rajarajeswari Balasubramaniam | Rs. 540.00 |
-| ACC1003 | Priya Agarwal | Rs. 0.00 |
-| ACC1004 | Rahul Mehta | Rs. 3,200.50 |
+| ACC1001 | Nithin Jain | ₹1,250.75 |
+| ACC1002 | Rajarajeswari Balasubramaniam | ₹540.00 |
+| ACC1003 | Priya Agarwal | ₹0.00 |
+| ACC1004 | Rahul Mehta | ₹3,200.50 |
 
 ## Sample Conversations
 
@@ -83,7 +83,7 @@ pincode?
 
 You: DOB is 14th May 1990
 
-Agent: Identity verified. Your outstanding balance is Rs. 1,250.75. How much
+Agent: Identity verified. Your outstanding balance is ₹1,250.75. How much
 would you like to pay today?
 
 You: I want to pay five hundred
@@ -104,7 +104,7 @@ Agent: What name is printed on the card?
 
 You: Nithin Jain
 
-Agent: Payment of Rs. 500.00 processed successfully! Your transaction ID is
+Agent: Payment of ₹500.00 processed successfully! Your transaction ID is
 txn_abc123. Thank you for your payment.
 ```
 
@@ -140,7 +140,7 @@ assistance.
 ```
 ...after successful verification...
 
-Agent: Your outstanding balance is Rs. 1,250.75. How much would you like to pay?
+Agent: Your outstanding balance is ₹1,250.75. How much would you like to pay?
 
 You: 500
 
