@@ -230,6 +230,33 @@ def test_expired_card_blocked_locally():
     assert validate_expiry(12, 2099) is True
 
 
+def test_name_volunteered_with_account_id_is_not_re_asked():
+    """If the user provides their name in the same message as the account ID,
+    the agent must not ask for the name again on the next turn."""
+    from agent import Agent
+
+    llm_responses = iter([
+        {"account_id": "ACC1001"},   # account ID extraction from greeting
+        {"full_name": "Nithin Jain"},  # name extraction from same greeting message
+        # No further LLM call expected before the agent uses pending_name
+    ])
+
+    with patch("llm.client.chat.completions.create") as mock_llm, \
+         patch("tools._client.post") as mock_http:
+
+        mock_llm.side_effect = lambda *_, **__: groq_response(next(llm_responses, {}))
+        mock_http.return_value = http_response(ACCOUNT_1001, 200)
+
+        a = Agent()
+        # User provides both account ID and name in one message
+        response = a.next("Hi, I'm Nithin Jain and my account is ACC1001")
+        # Agent should have used pending_name and be asking for secondary factor,
+        # not asking for the name again
+        msg = response["message"].lower()
+        assert "full name" not in msg, f"Agent re-asked for name: {response['message']}"
+        assert any(k in msg for k in ("date of birth", "aadhaar", "pincode", "verification"))
+
+
 def test_account_sensitive_fields_absent_from_llm_prompts():
     """DOB, Aadhaar last 4, and pincode must never be passed to the LLM."""
     from agent import Agent
