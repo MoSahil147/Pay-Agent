@@ -64,9 +64,14 @@ class Agent:
     def _handle_greeting(self, user_input: str) -> str:
         # Try to extract an account ID from the very first message.
         # If found, skip the prompt and go straight to lookup.
+        # Also capture the name if volunteered in the same message so VERIFY
+        # does not re-ask for information the user already provided.
         extracted = extract(EXTRACT_ACCOUNT_ID.format(user_input=user_input))
         if extracted.get("account_id"):
             self._state.account_id = extracted["account_id"]
+            name_extracted = extract(EXTRACT_NAME.format(user_input=user_input))
+            if name_extracted.get("full_name"):
+                self._state.pending_name = name_extracted["full_name"]
             self._state.state = State.LOOKUP
             return self._do_lookup()
         self._state.state = State.LOOKUP
@@ -81,6 +86,10 @@ class Agent:
                     "Your account ID should look like ACC1001. Could you please share it?"
                 )
             self._state.account_id = extracted["account_id"]
+            # Capture name if volunteered alongside the account ID.
+            name_extracted = extract(EXTRACT_NAME.format(user_input=user_input))
+            if name_extracted.get("full_name"):
+                self._state.pending_name = name_extracted["full_name"]
         return self._do_lookup()
 
     def _do_lookup(self) -> str:
@@ -110,6 +119,22 @@ class Agent:
             balance=data["balance"],
         )
         self._state.state = State.VERIFY
+
+        # If the user volunteered their name in the same message as the account ID,
+        # verify it immediately instead of asking again.
+        if self._state.pending_name:
+            name = self._state.pending_name
+            self._state.pending_name = None
+            if verify_name(name, self._state.account):
+                self._state.name_verified = True
+                return (
+                    "Thank you. To complete verification, could you please provide one of the following: "
+                    "your date of birth, the last 4 digits of your Aadhaar, or your pincode?"
+                )
+            return self._fail_verify(
+                "That name doesn't match our records. Please double-check your full name."
+            )
+
         return "Got it. To verify your identity, could you please confirm your full name?"
 
     def _handle_verify(self, user_input: str) -> str:
@@ -118,8 +143,14 @@ class Agent:
         account = self._state.account
 
         if not self._state.name_verified:
-            extracted = extract(EXTRACT_NAME.format(user_input=user_input))
-            name = extracted.get("full_name")
+            # Use a name captured in an earlier turn if the user volunteered it
+            # alongside their account ID, so we do not re-ask unnecessarily.
+            if self._state.pending_name:
+                name = self._state.pending_name
+                self._state.pending_name = None
+            else:
+                extracted = extract(EXTRACT_NAME.format(user_input=user_input))
+                name = extracted.get("full_name")
             if not name:
                 return "I didn't catch your full name. Could you please share it?"
             if not verify_name(name, account):
