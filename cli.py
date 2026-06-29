@@ -7,9 +7,11 @@ from agent import Agent
 def main():
     print("Pay-Agent: Payment Collection Assistant")
     print("Type 'quit' or 'exit' to end the session.\n")
+    # Agent instance created
     agent = Agent()
     while True:
         try:
+            # removing the leading whitespaces
             user_input = input("You: ").strip()
         except (KeyboardInterrupt, EOFError):
             print("\nSession ended.")

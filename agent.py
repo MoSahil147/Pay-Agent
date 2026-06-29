@@ -29,6 +29,9 @@ TERMINAL_ERROR_MSG = (
 
 class Agent:
     def __init__(self):
+        # self= current isntaance of Agent class
+        # _state is an attribute to the agent, _ is private, like dont touch outside the class
+        # its like creating a fresh instance of conversationstate class and assign it to _state!
         self._state = ConversationState()
 
     def next(self, user_input: str) -> dict:

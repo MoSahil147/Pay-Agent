@@ -41,17 +41,18 @@ class CardData:
     expiry_year: Optional[int] = None
 
 
-@dataclass
+# dataclass is a python shortcut to autogenerate __init__ and other boilerplate so like we dont have to write manually
+@dataclass # mem of one convo
 class ConversationState:
     # The single source of truth for where the conversation is and what we know so far.
     state: State = State.GREETING
-    account_id: Optional[str] = None
-    account: Optional[AccountData] = None
+    account_id: Optional[str] = None # either String or NONE
+    account: Optional[AccountData] = None # we dont get frpm the AccountData, mark None
     verified: bool = False
     retry_count: int = 0
     name_verified: bool = False
     payment_amount: Optional[float] = None
-    card: CardData = field(default_factory=CardData)
+    card: CardData = field(default_factory=CardData) # defaultfactory is should be fresh per instance, to have no instance of old card data at all!
     transaction_id: Optional[str] = None
     history: list = field(default_factory=list)
     # Name extracted before the VERIFY state (e.g. volunteered in the same message
