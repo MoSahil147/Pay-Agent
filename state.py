@@ -1,9 +1,10 @@
 # All session state lives here. Nothing outside this file should invent new fields;
 # every piece of data the agent needs during a call is tracked in ConversationState.
 
-from dataclasses import dataclass, field
-from enum import Enum
-from typing import Optional
+## __init__ helps to set up objects when we create them
+from dataclasses import dataclass, field  # dataclass auto-generates __init__ and boilerplate; field() configures individual attributes (e.g. default_factory for mutable defaults)
+from enum import Enum  # Enum gives the FSM states named constants instead of raw strings, preventing typos and making comparisons safe
+from typing import Optional  # Optional[X] marks fields that may be None, documenting which pieces of state are not yet known
 
 
 class State(Enum):
@@ -45,16 +46,16 @@ class CardData:
 @dataclass # mem of one convo
 class ConversationState:
     # The single source of truth for where the conversation is and what we know so far.
-    state: State = State.GREETING
-    account_id: Optional[str] = None # either String or NONE
-    account: Optional[AccountData] = None # we dont get frpm the AccountData, mark None
-    verified: bool = False
-    retry_count: int = 0
-    name_verified: bool = False
-    payment_amount: Optional[float] = None
-    card: CardData = field(default_factory=CardData) # defaultfactory is should be fresh per instance, to have no instance of old card data at all!
-    transaction_id: Optional[str] = None
-    history: list = field(default_factory=list)
+    state: State = State.GREETING # will start the FSM at the greeting Node
+    account_id: Optional[str] = None # None until the user provides it; we then use it to make the API call
+    account: Optional[AccountData] = None # Full account record we will store inside the account which we will get from the API
+    verified: bool = False # start with false, once user verified will mark TRue
+    retry_count: int = 0 # failed verification
+    name_verified: bool = False # name verification
+    payment_amount: Optional[float] = None # None until user says how much they want to pay
+    card: CardData = field(default_factory=CardData) # field() with default_factory creates a fresh empty CardData every call so old card details never bleed into a new call
+    transaction_id: Optional[str] = None # None until payment succeeds; the API sets this to confirm the transaction
+    history: list = field(default_factory=list) # field() with default_factory gives a fresh empty list every call; grows with each message sent and received
     # Name extracted before the VERIFY state (e.g. volunteered in the same message
     # as the account ID). Used once in _handle_verify to avoid re-asking.
     pending_name: Optional[str] = None
